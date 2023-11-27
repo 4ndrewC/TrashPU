@@ -1,0 +1,92 @@
+------------------------------
+6502 8-bit CPU Architecture:
+
+8-bit data bus (i.e., it can transfer data 8 bits at a time)
+64 KB of addressable memory (16-bit address bus)
+65 instructions, including operations for addition, subtraction, multiplication, division, bit manipulation, and logic operations
+Registers:
+Two 8-bit accumulators (A and B)
+Two 16-bit index registers (X and Y)
+Two 8-bit stack pointers (SP and S)
+One 16-bit program counter (PC)
+
+
+-------------------------------
+Instructions:
+
+LDA (Load Accumulator) x
+LDY (Load Y Register) x
+LDX (Load X Register) x
+STA (Store Accumulator) x
+STX (Store X Register) x
+STY (Store Y Register) x
+
+TAX (Transfer Accumulator to X) x
+TAY (Transfer Accumulator to Y) x
+TXA (Transfer X to Accumulator) x
+TYA (Transfer Y to Accumulator) x
+
+TSX (Transfer Stack Pointer to X Register) x
+TXS (Transfer X Register to Stack Pointer) x
+PHA (Push accumulator onto stack) x
+PHP (Push Processor Status onto Stack) x
+PLA (Pull accumulator from stack) x
+PLP (Pull processor status from stack) x
+
+AND (bitwise AND) x
+EOR (Exclusive OR) x
+ORA (bitwise OR) x
+BIT (Bit test) x
+
+ADC (Add with Carry)
+SBC (Subtract with Carry)
+CMP (Compare accumulator) x
+CPX (Compare X register) x
+CPY (Compare Y register) x
+
+INC	(Increment a memory location   N,Z) x
+INX	(Increment the X register	   N,Z) x
+INY	(Increment the Y register	   N,Z) x 
+DEC	(Decrement a memory location   N,Z) x 
+DEX	(Decrement the X register	   N,Z) x
+DEY	(Decrement the Y register	   N,Z) x
+
+ASL	(Arithmetic Shift Left	N,Z,C)
+LSR	(Logical Shift Right	N,Z,C)
+ROL	(Rotate Left	        N,Z,C)
+ROR	(Rotate Right	        N,Z,C)
+
+JMP	(Jump to another location) x
+JSR	(Jump to a subroutine)	   x
+RTS	(Return from subroutine)
+
+BCC	(Branch if carry flag clear)
+BCS	(Branch if carry flag set)
+BEQ	(Branch if zero flag set)
+BMI	(Branch if negative flag set) 
+BNE	(Branch if zero flag clear)	 
+BPL	(Branch if negative flag clear) 
+BVC	(Branch if overflow flag clear) 
+BVS	(Branch if overflow flag set)
+
+CLC	(Clear carry flag	            C)
+CLD	(Clear decimal mode flag	    D)
+CLI	(Clear interrupt disable flag	I)
+CLV	(Clear overflow flag	        V)
+SEC	(Set carry flag	                C)
+SED	(Set decimal mode flag	        D)
+SEI	(Set interrupt disable flag	    I)
+
+BRK	(Force an interrupt	      B)
+NOP	(No Operation)
+RTI	(Return from Interrupt	All)
+
+----------------------------------
+
+Memory Map:
+
+Zero Page: 0x0000-0x00FF
+Stack: 0x0100 - 0x10FF
+Ram: 0x0200 - 0x7FFF
+Memory-Mapped IO: 0x8000 - 0xFFFF
+ROM: 0xC000 - 0xFFFF
