@@ -1,14 +1,14 @@
 #ifndef FLAGS_H
 #define FLAGS_H
 
-// define instruction and respective addresses
-#define C 1
-#define Z 2
-#define I 3
-#define D 4
-#define B 5
-#define O 6
-#define N 7
+// define flags
+#define Cf 1
+#define Zf 2
+#define If 3
+#define Df 4
+#define Bf 5
+#define Of 6
+#define Nf 7
 
 
 #endif

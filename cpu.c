@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "instructions.h"
-#include "memory.c"
 #include "flags.h"
 
 //mem[0] stores current rom pointer, mem[1] stores current ram pointer
@@ -14,6 +13,7 @@ word A, SP, P, X, Y;
 
 //status flags
 byte flag;
+byte C, Z, N, I, D, B, O;
 
 int mem[65536];
 
@@ -27,223 +27,194 @@ void CPUInit(){
 
 }
 
-int readMem(){
-    int data = mem[PC];
-    // printf("Y should equal this: ");
-    // printf("%d", data);
-    // printf("\n");
+int readMem(word addr){
+    int data = mem[addr];
     return data; // return data being read given the address of ram memory
 }
 
-void writeMem(int data, word addr){
+void writeMem(byte data, word addr){
     mem[addr] = data;
 }
 
 void setFlag(){
-
-}
-
-void execute(){;
-    switch(mem[PC]){
-        case LDA:
-        
-            printf("%s", "LDA");
-            printf("\n");
-            
-            PC = mem[1];
-            mem[1]++;
-            // printf("increment mem[1]\n");
-
-            A = readMem();
-            // printf("%d", A);
+    C = 0;
+    Z = 0;
+    I = 0;
+    N = 0;
+    D = 0;
+    B = 0;
+    O = 0;
+    switch(flag){
+        case Cf:
+            C = 1;
             break;
-        
-        case LDY:
-        
-            PC = mem[1];
-            mem[1]++;
-            Y = readMem();
+        case Zf:
+            Z = 1;
             break;
-        
-        case LDX:
-        
-            printf("%s", "LDX");
-            printf("\n");
-            PC = mem[1];
-            mem[1]++;
-            // printf("increment mem[1]\n");
-            X = readMem();
+        case If:
+            I = 1;
             break;
-        
-        case STA:
-        
-            PC = mem[0];
-            printf("current PC STA opcode: ");
-            printf("%d", PC);
-            printf("\n");
-            mem[0]++;
-            // printf("increment mem[0]\n");
-            // printf("Y here: ");
-            // printf("%d", Y);
-            // printf("\n");
-            Y = readMem();
-            writeMem(A, Y);
-            SP--;
-
+        case Nf:
+            N = 1;
             break;
-        
-        case STX:
-        
-            PC = mem[0];
-            printf("current PC STX opcode: ");
-            printf("%d", PC);
-            printf("\n");
-            mem[0]++;
-            // printf("increment mem[0]\n");
-            Y = readMem();
-            writeMem(X, Y);
-            SP--;
-
+        case Df:
+            D = 1;
             break;
-        
-        case STY:
-        
-            PC = mem[0];
-            printf("current PC STY opcode: ");
-            printf("%d", PC);
-            printf("\n");
-            mem[0]++;
-            // printf("increment mem[0]\n");
-            X = readMem();
-            writeMem(Y, X);
-            SP--;
-
+        case Bf:
+            B = 1;
             break;
-        
-        case TAX:
-
-            X = A;
-            if(X==0){
-                flag = Z;
-            }
-            else if(X<=0){
-                flag = N;
-            }
-            break;
-        
-        case TAY:
-            Y = A;
-            if(Y==0){
-                flag = Z;
-            }
-            else if(Y<=0){
-                flag = N;
-            }
-            break;
-        
-        case TXA:
-            A = X;
-            if(A==0){
-                flag = Z;
-            }
-            else if(A<=0){
-                flag = N;
-            }
-            break;
-        
-        case TYA:
-            A = Y;
-            if(A==0){
-                flag = Z;
-            }
-            else if(A<=0){
-                flag = N;
-            }
-            break;
-        
-        case TSX:
-            X = SP;
-            if(X==0){
-                flag = Z;
-            }
-            else if(X<=0){
-                flag = N;
-            }
-            break;
-        case TXS:
-            SP = X;
-        case PHA:
-            SP--;
-            mem[SP] = A;    
-            break;
-        case PHP:
-            SP--;
-            mem[SP] = flag;
-            break;
-        case PLA:
-            A = mem[SP];
-            if(A==0){
-                flag = Z;
-            }
-            else if(A<=0){
-                flag = N;
-            }
-            break;
-        case PLP:
-            flag = mem[SP];
+        case Of:
+            O = 1;
             break;
     }
 }
 
+void execute(){;
+    switch(mem[PC]){
+        word data;
+        word addr;
+        //LDA
+        case LDA_I:
+
+            printf("%s", "LDA_I");
+            printf("\n");   
+            PC++;
+            data = mem[PC%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = data;
+            }
+            
+            break;
+
+        case LDA_Z:
+            printf("%s", "LDA_Z");
+            printf("\n");   
+            PC++;
+            data = mem[mem[PC]%(0x00FF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = data;
+            }
+            break;
+
+        case LDA_ZX:
+            printf("%s", "LDA_ZX");
+            printf("\n");   
+            PC++;
+            data = mem[X+mem[PC]%(0x00FF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = data;
+            }
+            break;
+
+        case LDA_A:
+
+            printf("%s", "LDA_A");
+            printf("\n");   
+            PC++;
+            data = mem[mem[PC]%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = data;
+            }
+
+            break;
+        
+        case LDA_AX:
+
+            printf("%s", "LDA_AX");
+            printf("\n");   
+            PC++;
+            data = mem[X+mem[PC]%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = data;
+            }
+
+            break;
+        
+        case LDA_AY:
+
+            printf("%s", "LDA_AY");
+            printf("\n");   
+            PC++;
+            data = mem[Y+mem[PC]%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = data;
+            }
+            
+            break;
+        
+        case LDA_IX:
+
+            printf("%s", "LDA_IX");
+            printf("\n");   
+            PC++;
+            data = mem[X+(mem[mem[PC]%(0xFFFF+1)]%(0xFFFF+1))];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = data;
+            }
+            
+            break;
+        
+        case LDA_IY:
+
+            printf("%s", "LDA_IY");
+            printf("\n");   
+            PC++;
+            data = mem[Y+(mem[mem[PC]%(0xFFFF+1)]%(0xFFFF+1))];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = data;
+            }
+            
+            break;
+        
+        //STA
+        case STA_Z:
+            printf("STA_Z");
+            printf("\n");
+            PC++;
+            addr = mem[PC]%(0x00FF+1);
+            mem[addr] = A;
+            break;
+        
+        case STA_ZX:
+            printf("STA_Z");
+            printf("\n");
+            PC++;
+            addr = X+mem[PC]%(0x00FF+1);
+            mem[addr] = A;
+            break;
+            break;
+        
+    }
+}
+
 void fetch(){
-    
-    PC = mem[0];
-    printf("current PC fetch: ");
+
+    printf("PC fetch addr: ");
     printf("%d", PC);
     printf("\n");
-    mem[0]++;
-    // printf("increment mem[0]\n");
     printf("current instruction: ");
     printf("%d", mem[PC]);
     printf("\n");
+    // printf("increment mem[0]\n");
+
     execute();
+    PC++;
 }
 
 
-int main(){
-    CPUInit();
-
-    //ram section
-    mem[0x0200] = 34;
-    mem[0x0201] = 23;
-    mem[0x0202] = 89;
-
-
-    //rom section
-    mem[0xC000] = 1;
-    mem[0xC001] = 4;
-    mem[0xC002] = 0x0210;
-    mem[0xC003] = 3;
-    mem[0xC004] = 5;
-    mem[0xC005] = 0x0211;
-    mem[0xC006] = 2;
-    mem[0xC007] = 6;
-    mem[0xC008] = 0x0212;
-
-    //initialize zero page address pointers
-    mem[0] = 0xC000; 
-    mem[1] = 0x0200; 
-
-    fetch();
-    fetch();
-    fetch();
-    fetch();
-    fetch();
-    fetch();
-    
-    printf("%d", mem[0x0211]);
-    // printf("\n");
-    // printf("%d", SP);
-    
-    return 0;
-}

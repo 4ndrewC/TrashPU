@@ -90,3 +90,15 @@ Stack: 0x0100 - 0x10FF
 Ram: 0x0200 - 0x7FFF
 Memory-Mapped IO: 0x8000 - 0xFFFF
 ROM: 0xC000 - 0xFFFF
+
+----------------------------------
+
+Flags:
+
+Carry
+Zero
+Negative
+Interrupt Disable
+Decimal mode
+Break command
+Overflow

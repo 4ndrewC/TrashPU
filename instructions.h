@@ -1,38 +1,24 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
-// define instruction and respective addresses
-#define LDA 1
-#define LDY 2
-#define LDX 3
-#define STA 4
-#define STX 5
-#define STY 6
-#define TAX 7
-#define TAY 8
-#define TXA 9
-#define TYA 10
-#define TSX 11
-#define TXS 12
-#define PHA 13
-#define PHP 14
-#define PLA 15
-#define PLP 16
-#define AND 17
-#define EOR 18
-#define ORA 19
-#define BIT 20
-#define CMP 21
-#define CPX 22
-#define CPY 23
-#define INC 24
-#define INX 25
-#define INY 26
-#define DEC 27
-#define DEX 28
-#define DEY 29
-#define JMP 30
-#define JSR 31
+// define instruction
+#define LDA_I 0xA9
+#define LDA_Z 0xA5
+#define LDA_ZX 0xB5
+#define LDA_A 0xAD
+#define LDA_AX 0xBD
+#define LDA_AY 0xB9
+#define LDA_IX 0xA1
+#define LDA_IY 0xB1
+
+#define STA_Z 0x85
+#define STA_ZX 0x95
+#define STA_A 0x8D
+#define STA_AX 0x9D
+#define STA_AY 0x99
+#define STA_IX 0x81
+#define STA_IY 0x91
+
 
 
 #endif
