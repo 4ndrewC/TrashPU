@@ -37,13 +37,7 @@ void writeMem(byte data, word addr){
 }
 
 void setFlag(){
-    C = 0;
-    Z = 0;
-    I = 0;
-    N = 0;
-    D = 0;
-    B = 0;
-    O = 0;
+    C = I = Z = N = D = B = O = 0;
     switch(flag){
         case Cf:
             C = 1;
@@ -71,13 +65,12 @@ void setFlag(){
 
 void execute(){;
     switch(mem[PC]){
-        word data;
+        int data;
         word addr;
         //LDA
         case LDA_I:
 
-            printf("%s", "LDA_I");
-            printf("\n");   
+            printf("%s", "LDA_I\n");
             PC++;
             data = mem[PC%(0xFFFF+1)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
@@ -89,8 +82,7 @@ void execute(){;
             break;
 
         case LDA_Z:
-            printf("%s", "LDA_Z");
-            printf("\n");   
+            printf("%s", "LDA_Z\n");
             PC++;
             data = mem[mem[PC]%(0x00FF+1)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
@@ -101,10 +93,9 @@ void execute(){;
             break;
 
         case LDA_ZX:
-            printf("%s", "LDA_ZX");
-            printf("\n");   
+            printf("%s", "LDA_ZX\n");
             PC++;
-            data = mem[X+mem[PC]%(0x00FF+1)];
+            data = mem[(X+mem[PC])%(0x00FF+1)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -114,8 +105,7 @@ void execute(){;
 
         case LDA_A:
 
-            printf("%s", "LDA_A");
-            printf("\n");   
+            printf("%s", "LDA_A\n");
             PC++;
             data = mem[mem[PC]%(0xFFFF+1)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
@@ -128,10 +118,9 @@ void execute(){;
         
         case LDA_AX:
 
-            printf("%s", "LDA_AX");
-            printf("\n");   
+            printf("%s", "LDA_AX\n");
             PC++;
-            data = mem[X+mem[PC]%(0xFFFF+1)];
+            data = mem[(X+mem[PC])%(0xFFFF+1)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -142,10 +131,9 @@ void execute(){;
         
         case LDA_AY:
 
-            printf("%s", "LDA_AY");
-            printf("\n");   
+            printf("%s", "LDA_AY\n");
             PC++;
-            data = mem[Y+mem[PC]%(0xFFFF+1)];
+            data = mem[(Y+mem[PC])%(0xFFFF+1)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -153,53 +141,390 @@ void execute(){;
             }
             
             break;
-        
-        case LDA_IX:
 
-            printf("%s", "LDA_IX");
-            printf("\n");   
+
+        //LDX
+        case LDX_I:
+
+            printf("%s", "LDX_I\n");
             PC++;
-            data = mem[X+(mem[mem[PC]%(0xFFFF+1)]%(0xFFFF+1))];
+            data = mem[PC%(0xFFFF+1)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
-                A = data;
+                X = data;
             }
             
             break;
-        
-        case LDA_IY:
 
-            printf("%s", "LDA_IY");
-            printf("\n");   
+        case LDX_Z:
+            printf("%s", "LDX_Z\n");
             PC++;
-            data = mem[Y+(mem[mem[PC]%(0xFFFF+1)]%(0xFFFF+1))];
+            data = mem[mem[PC]%(0x00FF+1)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
-                A = data;
+                X = data;
+            }
+            break;
+
+        case LDX_ZY:
+            printf("%s", "LDX_ZY\n");
+            PC++;
+            data = mem[(Y+mem[PC])%(0x00FF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                X = data;
+            }
+            break;
+
+        case LDX_A:
+
+            printf("%s", "LDX_A\n");
+            PC++;
+            data = mem[mem[PC]%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                X = data;
+            }
+
+            break;
+
+        case LDX_AY:
+
+            printf("%s", "LDX_AY\n");
+            PC++;
+            data = mem[(Y+mem[PC])%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                X = data;
+            }
+            
+            break;
+
+        //LDY
+        case LDY_I:
+
+            printf("%s", "LDY_I\n");
+            PC++;
+            data = mem[PC%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                Y = data;
+            }
+            
+            break;
+
+        case LDY_Z:
+            printf("%s", "LDX_Z\n");
+            PC++;
+            data = mem[mem[PC]%(0x00FF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                Y = data;
+            }
+            break;
+
+        case LDY_ZX:
+            printf("%s", "LDY_ZX\n");
+            PC++;
+            data = mem[(X+mem[PC])%(0x00FF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                Y = data;
+            }
+            break;
+
+        case LDY_A:
+
+            printf("%s", "LDY_A\n");
+            PC++;
+            data = mem[mem[PC]%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                Y = data;
+            }
+
+            break;
+            
+        case LDY_AX:
+
+            printf("%s", "LDY_AX\n");
+            PC++;
+            data = mem[(X+mem[PC])%(0xFFFF+1)];
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                Y = data;
             }
             
             break;
         
         //STA
         case STA_Z:
-            printf("STA_Z");
-            printf("\n");
+            printf("STA_Z\n");
             PC++;
             addr = mem[PC]%(0x00FF+1);
             mem[addr] = A;
             break;
         
         case STA_ZX:
-            printf("STA_Z");
-            printf("\n");
+            printf("STA_Z\n");
             PC++;
             addr = X+mem[PC]%(0x00FF+1);
             mem[addr] = A;
             break;
+            
+        case STA_A:
+            printf("STA_A\n");
+            PC++;
+            addr = mem[PC]%(0xFFFF+1);
+            mem[addr] = A;
             break;
         
+        case STA_AX:
+            printf("STA_AX\n");
+            PC++;
+            addr = (X+mem[PC])%(0xFFFF+1);
+            mem[addr] = A;
+            break;
+        
+        case STA_AY:
+            printf("STA_AY\n");
+            PC++;
+            addr = (Y+mem[PC])%(0xFFFF+1);
+            mem[addr] = A;
+            break;
+        
+
+        
+        //STX
+        case STX_Z:
+            printf("STX_Z\n");
+            PC++;
+            addr = mem[PC]%(0x00FF+1);
+            mem[addr] = X;
+            break;
+        case STX_ZY:
+            printf("STX_ZY\n");
+            PC++;
+            addr = (Y+mem[PC])%(0x00FF+1);
+            mem[addr] = X;
+            break;
+
+        case STX_A:
+            printf("STX_A\n");
+            PC++;
+            addr = mem[PC]%(0xFFFF+1);
+            mem[addr] = X;
+            break;
+
+        //STY
+        case STY_Z:
+            printf("STY_Z\n");
+            PC++;
+            addr = mem[PC]%(0x00FF+1);
+            mem[addr] = Y;
+            break;
+        case STY_ZX:
+            printf("STY_ZX\n");
+            PC++;
+            addr = (X+mem[PC])%(0x00FF+1);
+            mem[addr] = Y;
+            break;
+            
+        case STY_A:
+            printf("STY_A\n");
+            PC++;
+            addr = mem[PC]%(0xFFFF+1);
+            mem[addr] = Y;
+            break;
+        
+
+        //Transfers
+        case TAX:
+            printf("TAX\n");
+            flag = A<0 ? Nf: A==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                X = A;
+            }
+            break;
+        case TAY:
+            printf("TAY\n");
+            flag = A<0 ? Nf: A==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                Y = A;
+            }
+            break;
+        case TXA:
+            printf("TXA\n");
+            flag = X<0 ? Nf: X==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = X;
+            }
+            break;
+        case TYA:
+            printf("TYA\n");
+            flag = Y<0 ? Nf: Y==0 ? Zf: 0;
+            setFlag();
+            if(!(N || Z)){
+                A = Y;
+            }
+            break;
+
+
+        //logicals
+
+        //AND
+        case AND_I:
+            printf("AND_I\n");
+            PC++;
+            data = mem[PC] & A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case AND_Z:
+            printf("AND_Z\n");
+            PC++;
+            data = mem[mem[PC]%(0x00FF+1)] & A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case AND_ZX:
+            printf("AND_ZX\n");
+            PC++;
+            data = mem[(X+mem[PC])%(0x00FF+1)] & A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case AND_A:
+            printf("AND_ZX\n");
+            PC++;
+            data = mem[mem[PC]%(0xFFFF+1)] & A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case AND_AX:
+            printf("AND_AX\n");
+            PC++;
+            data = mem[(X+mem[PC])%(0xFFFF+1)] & A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case AND_AY:
+            printf("AND_AY\n");
+            PC++;
+            data = mem[(Y+mem[PC])%(0xFFFF+1)] & A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        
+        //EOR
+        case EOR_I:
+            printf("EOR_I\n");
+            PC++;
+            data = mem[PC]^A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case EOR_Z:
+            printf("EOR_Z\n");
+            PC++;
+            data = mem[mem[PC]%(0x00FF+1)]^A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case EOR_ZX:
+            printf("EOR_ZX\n");
+            PC++;
+            data = mem[(X+mem[PC])%(0x00FF+1)]^A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case EOR_A:
+            printf("EOR_ZX\n");
+            PC++;
+            data = mem[mem[PC]%(0xFFFF+1)]^A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case EOR_AX:
+            printf("EOR_AX\n");
+            PC++;
+            data = mem[(X+mem[PC])%(0xFFFF+1)]^A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case EOR_AY:
+            printf("EOR_AY\n");
+            PC++;
+            data = mem[(Y+mem[PC])%(0xFFFF+1)]^A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        
+        //ORA
+        case ORA_I:
+            printf("ORA_I\n");
+            PC++;
+            data = mem[PC]|A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case ORA_Z:
+            printf("ORA_Z\n");
+            PC++;
+            data = mem[mem[PC]%(0x00FF+1)]|A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case ORA_ZX:
+            printf("ORA_ZX\n");
+            PC++;
+            data = mem[(X+mem[PC])%(0x00FF+1)]|A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case ORA_A:
+            printf("ORA_ZX\n");
+            PC++;
+            data = mem[mem[PC]%(0xFFFF+1)]|A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case ORA_AX:
+            printf("ORA_AX\n");
+            PC++;
+            data = mem[(X+mem[PC])%(0xFFFF+1)]|A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+        case ORA_AY:
+            printf("ORA_AY\n");
+            PC++;
+            data = mem[(Y+mem[PC])%(0xFFFF+1)]|A;
+            flag = data<0 ? Nf: data==0 ? Zf: 0;
+            setFlag();
+            break;
+
+        //jumps and calls
+        case JMP:
+            printf("JMP\n");
+            PC++;
+            addr = mem[PC]%0x3FFF + 0xC000;
+            PC = addr;
+            break;
+
     }
 }
 
