@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "instructions.h"
 #include "flags.h"
+#include "memory.c"
 
 //mem[0] stores current rom pointer, mem[1] stores current ram pointer
 
-typedef unsigned short word;
-typedef unsigned char byte;
+typedef uint16_t word;
+typedef uint8_t byte;
 
 word PC;
 word A, SP, P, X, Y;
@@ -14,10 +16,12 @@ word A, SP, P, X, Y;
 //status flags
 byte flag;
 byte C, Z, N, I, D, B, O;
+word maxWrite = 0xC000;
+int maxRead = 0xFFFF+1;
 
-int mem[65536];
 
 void CPUInit(){
+    memoryInit();
     PC = 0xC000;
     SP = 0x10FF;
 
@@ -37,7 +41,7 @@ void writeMem(byte data, word addr){
 }
 
 void setFlag(){
-    C = I = Z = N = D = B = O = 0;
+    I = Z = N = D = B = 0;
     switch(flag){
         case Cf:
             C = 1;
@@ -63,16 +67,26 @@ void setFlag(){
     }
 }
 
+void setArithFlags(byte op, byte ac, int res){
+    I = Z = N = D = B = 0;
+    C = (res>0xFF)?1:0;
+    O = ((ac^op) & 0x80) && ((ac^res) & 0x80);
+    N = (res & 0x80)?1:0;
+    Z = (res==0)?1:0;
+    A = (byte)res;
+}
+
 void execute(){;
     switch(mem[PC]){
         int data;
         word addr;
+        int res;
         //LDA
         case LDA_I:
 
             printf("%s", "LDA_I\n");
             PC++;
-            data = mem[PC%(0xFFFF+1)];
+            data = mem[PC%(maxRead)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -81,33 +95,11 @@ void execute(){;
             
             break;
 
-        case LDA_Z:
-            printf("%s", "LDA_Z\n");
-            PC++;
-            data = mem[mem[PC]%(0x00FF+1)];
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            if(!(N || Z)){
-                A = data;
-            }
-            break;
-
-        case LDA_ZX:
-            printf("%s", "LDA_ZX\n");
-            PC++;
-            data = mem[(X+mem[PC])%(0x00FF+1)];
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            if(!(N || Z)){
-                A = data;
-            }
-            break;
-
         case LDA_A:
 
             printf("%s", "LDA_A\n");
             PC++;
-            data = mem[mem[PC]%(0xFFFF+1)];
+            data = mem[mem[PC]%(maxWrite)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -120,7 +112,7 @@ void execute(){;
 
             printf("%s", "LDA_AX\n");
             PC++;
-            data = mem[(X+mem[PC])%(0xFFFF+1)];
+            data = mem[(X+mem[PC])%(maxWrite)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -133,7 +125,7 @@ void execute(){;
 
             printf("%s", "LDA_AY\n");
             PC++;
-            data = mem[(Y+mem[PC])%(0xFFFF+1)];
+            data = mem[(Y+mem[PC])%(maxWrite)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -148,7 +140,7 @@ void execute(){;
 
             printf("%s", "LDX_I\n");
             PC++;
-            data = mem[PC%(0xFFFF+1)];
+            data = mem[PC%(maxRead)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -157,33 +149,11 @@ void execute(){;
             
             break;
 
-        case LDX_Z:
-            printf("%s", "LDX_Z\n");
-            PC++;
-            data = mem[mem[PC]%(0x00FF+1)];
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            if(!(N || Z)){
-                X = data;
-            }
-            break;
-
-        case LDX_ZY:
-            printf("%s", "LDX_ZY\n");
-            PC++;
-            data = mem[(Y+mem[PC])%(0x00FF+1)];
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            if(!(N || Z)){
-                X = data;
-            }
-            break;
-
         case LDX_A:
 
             printf("%s", "LDX_A\n");
             PC++;
-            data = mem[mem[PC]%(0xFFFF+1)];
+            data = mem[mem[PC]%(maxWrite)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -196,7 +166,7 @@ void execute(){;
 
             printf("%s", "LDX_AY\n");
             PC++;
-            data = mem[(Y+mem[PC])%(0xFFFF+1)];
+            data = mem[(Y+mem[PC])%(maxWrite)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -210,7 +180,7 @@ void execute(){;
 
             printf("%s", "LDY_I\n");
             PC++;
-            data = mem[PC%(0xFFFF+1)];
+            data = mem[PC%(maxRead)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -219,33 +189,11 @@ void execute(){;
             
             break;
 
-        case LDY_Z:
-            printf("%s", "LDX_Z\n");
-            PC++;
-            data = mem[mem[PC]%(0x00FF+1)];
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            if(!(N || Z)){
-                Y = data;
-            }
-            break;
-
-        case LDY_ZX:
-            printf("%s", "LDY_ZX\n");
-            PC++;
-            data = mem[(X+mem[PC])%(0x00FF+1)];
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            if(!(N || Z)){
-                Y = data;
-            }
-            break;
-
         case LDY_A:
 
             printf("%s", "LDY_A\n");
             PC++;
-            data = mem[mem[PC]%(0xFFFF+1)];
+            data = mem[mem[PC]%(maxWrite)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -258,7 +206,7 @@ void execute(){;
 
             printf("%s", "LDY_AX\n");
             PC++;
-            data = mem[(X+mem[PC])%(0xFFFF+1)];
+            data = mem[(X+mem[PC])%(maxWrite)];
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             if(!(N || Z)){
@@ -268,82 +216,43 @@ void execute(){;
             break;
         
         //STA
-        case STA_Z:
-            printf("STA_Z\n");
-            PC++;
-            addr = mem[PC]%(0x00FF+1);
-            mem[addr] = A;
-            break;
-        
-        case STA_ZX:
-            printf("STA_Z\n");
-            PC++;
-            addr = X+mem[PC]%(0x00FF+1);
-            mem[addr] = A;
-            break;
-            
         case STA_A:
             printf("STA_A\n");
             PC++;
-            addr = mem[PC]%(0xFFFF+1);
+            addr = mem[PC]%(maxWrite);
             mem[addr] = A;
             break;
         
         case STA_AX:
             printf("STA_AX\n");
             PC++;
-            addr = (X+mem[PC])%(0xFFFF+1);
+            addr = (X+mem[PC])%(maxWrite);
             mem[addr] = A;
             break;
         
         case STA_AY:
             printf("STA_AY\n");
             PC++;
-            addr = (Y+mem[PC])%(0xFFFF+1);
+            addr = (Y+mem[PC])%(maxWrite);
             mem[addr] = A;
             break;
         
 
         
         //STX
-        case STX_Z:
-            printf("STX_Z\n");
-            PC++;
-            addr = mem[PC]%(0x00FF+1);
-            mem[addr] = X;
-            break;
-        case STX_ZY:
-            printf("STX_ZY\n");
-            PC++;
-            addr = (Y+mem[PC])%(0x00FF+1);
-            mem[addr] = X;
-            break;
-
         case STX_A:
             printf("STX_A\n");
             PC++;
-            addr = mem[PC]%(0xFFFF+1);
+            addr = mem[PC]%(maxWrite);
             mem[addr] = X;
             break;
 
         //STY
-        case STY_Z:
-            printf("STY_Z\n");
-            PC++;
-            addr = mem[PC]%(0x00FF+1);
-            mem[addr] = Y;
-            break;
-        case STY_ZX:
-            printf("STY_ZX\n");
-            PC++;
-            addr = (X+mem[PC])%(0x00FF+1);
-            mem[addr] = Y;
-            break;
             
         case STY_A:
             printf("STY_A\n");
             PC++;
-            addr = mem[PC]%(0xFFFF+1);
+            addr = mem[PC]%(maxWrite);
             mem[addr] = Y;
             break;
         
@@ -389,42 +298,28 @@ void execute(){;
         case AND_I:
             printf("AND_I\n");
             PC++;
-            data = mem[PC] & A;
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            break;
-        case AND_Z:
-            printf("AND_Z\n");
-            PC++;
-            data = mem[mem[PC]%(0x00FF+1)] & A;
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            break;
-        case AND_ZX:
-            printf("AND_ZX\n");
-            PC++;
-            data = mem[(X+mem[PC])%(0x00FF+1)] & A;
+            data = mem[PC%maxRead] & A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case AND_A:
             printf("AND_ZX\n");
             PC++;
-            data = mem[mem[PC]%(0xFFFF+1)] & A;
+            data = mem[mem[PC]%(maxWrite)] & A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case AND_AX:
             printf("AND_AX\n");
             PC++;
-            data = mem[(X+mem[PC])%(0xFFFF+1)] & A;
+            data = mem[(X+mem[PC])%(maxWrite)] & A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case AND_AY:
             printf("AND_AY\n");
             PC++;
-            data = mem[(Y+mem[PC])%(0xFFFF+1)] & A;
+            data = mem[(Y+mem[PC])%(maxWrite)] & A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
@@ -433,42 +328,28 @@ void execute(){;
         case EOR_I:
             printf("EOR_I\n");
             PC++;
-            data = mem[PC]^A;
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            break;
-        case EOR_Z:
-            printf("EOR_Z\n");
-            PC++;
-            data = mem[mem[PC]%(0x00FF+1)]^A;
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            break;
-        case EOR_ZX:
-            printf("EOR_ZX\n");
-            PC++;
-            data = mem[(X+mem[PC])%(0x00FF+1)]^A;
+            data = mem[PC%maxRead]^A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case EOR_A:
             printf("EOR_ZX\n");
             PC++;
-            data = mem[mem[PC]%(0xFFFF+1)]^A;
+            data = mem[mem[PC]%(maxWrite)]^A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case EOR_AX:
             printf("EOR_AX\n");
             PC++;
-            data = mem[(X+mem[PC])%(0xFFFF+1)]^A;
+            data = mem[(X+mem[PC])%(maxWrite)]^A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case EOR_AY:
             printf("EOR_AY\n");
             PC++;
-            data = mem[(Y+mem[PC])%(0xFFFF+1)]^A;
+            data = mem[(Y+mem[PC])%(maxWrite)]^A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
@@ -477,42 +358,28 @@ void execute(){;
         case ORA_I:
             printf("ORA_I\n");
             PC++;
-            data = mem[PC]|A;
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            break;
-        case ORA_Z:
-            printf("ORA_Z\n");
-            PC++;
-            data = mem[mem[PC]%(0x00FF+1)]|A;
-            flag = data<0 ? Nf: data==0 ? Zf: 0;
-            setFlag();
-            break;
-        case ORA_ZX:
-            printf("ORA_ZX\n");
-            PC++;
-            data = mem[(X+mem[PC])%(0x00FF+1)]|A;
+            data = mem[PC%maxRead]|A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case ORA_A:
             printf("ORA_ZX\n");
             PC++;
-            data = mem[mem[PC]%(0xFFFF+1)]|A;
+            data = mem[mem[PC]%(maxWrite)]|A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case ORA_AX:
             printf("ORA_AX\n");
             PC++;
-            data = mem[(X+mem[PC])%(0xFFFF+1)]|A;
+            data = mem[(X+mem[PC])%(maxWrite)]|A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
         case ORA_AY:
             printf("ORA_AY\n");
             PC++;
-            data = mem[(Y+mem[PC])%(0xFFFF+1)]|A;
+            data = mem[(Y+mem[PC])%(maxWrite)]|A;
             flag = data<0 ? Nf: data==0 ? Zf: 0;
             setFlag();
             break;
@@ -521,8 +388,76 @@ void execute(){;
         case JMP:
             printf("JMP\n");
             PC++;
-            addr = mem[PC]%0x3FFF + 0xC000;
+            addr = mem[PC]%(0x3FFF+1) + 0xC000;
             PC = addr;
+            break;
+        
+        //arithmetic
+        //add with carry
+        case ADC_I:
+            printf("ADC_I\n");
+            PC++;
+            data = mem[PC%(maxRead)];
+            res = data + A + C;
+            setArithFlags(data, A, res);
+            
+            break;
+        case ADC_A:
+            printf("ADC_A\n");
+            PC++;
+            addr = mem[PC%(maxRead)]%maxWrite;
+            data = mem[addr];
+            res = data + A + C;
+            setArithFlags(data, A, res);
+            break;
+        case ADC_AX:
+            printf("ADC_AX\n");
+            PC++;
+            addr = (X+mem[PC%(maxRead)])%maxWrite;
+            data = mem[addr];
+            res = data + A + C;
+            setArithFlags(data, A, res);
+            break;
+        case ADC_AY:
+            printf("ADC_AY\n");
+            PC++;
+            addr = (Y+mem[PC%(maxWrite)])%maxWrite;
+            data = mem[addr];
+            res = data + A + C;
+            setArithFlags(data, A, res);
+            break;
+        
+        //subtract with carry
+        case SBC_I:
+            printf("SBC_I\n");
+            PC++;
+            data = mem[PC%(maxRead)];
+            res = data - A - C;
+            setArithFlags(data, A, res);
+            break;
+        case SBC_A:
+            printf("SBC_A\n");
+            PC++;
+            addr = mem[PC%(maxRead)]%maxWrite;
+            data = mem[addr];
+            res = data - A - C;
+            setArithFlags(data, A, res);
+            break;
+        case SBC_AX:
+            printf("SBC_AX\n");
+            PC++;
+            addr = (X+mem[PC%(maxRead)])%maxWrite;
+            data = mem[addr];
+            res = data - A - C;
+            setArithFlags(data, A, res);
+            break;
+        case SBC_AY:
+            printf("SBC_AY\n");
+            PC++;
+            addr = (Y+mem[PC%(maxWrite)])%maxWrite;
+            data = mem[addr];
+            res = data - A - C;
+            setArithFlags(data, A, res);
             break;
 
     }
@@ -530,13 +465,12 @@ void execute(){;
 
 void fetch(){
 
-    printf("PC fetch addr: ");
-    printf("%d", PC);
-    printf("\n");
-    printf("current instruction: ");
-    printf("%d", mem[PC]);
-    printf("\n");
-    // printf("increment mem[0]\n");
+    // printf("PC fetch addr: ");
+    // printf("%d", PC);
+    // printf("\n");
+    // printf("current instruction: ");
+    // printf("%d", mem[PC]);
+    // printf("\n");
 
     execute();
     PC++;

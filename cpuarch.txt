@@ -38,8 +38,8 @@ EOR (Exclusive OR  N,Z) x
 ORA (bitwise OR  N,Z) x
 BIT (Bit test  N,V,Z) x
 
-ADC (Add with Carry  N,V,Z,C)
-SBC (Subtract with Carry  N,V,Z,C)
+ADC (Add with Carry  N,V,Z,C)x
+SBC (Subtract with Carry  N,V,Z,C)x
 CMP (Compare accumulator  N,Z) x
 CPX (Compare X register  N,Z) x
 CPY (Compare Y register  N,Z) x
@@ -57,7 +57,7 @@ ROL	(Rotate Left	        N,Z,C)
 ROR	(Rotate Right	        N,Z,C)
 
 JMP	(Jump to another location) x
-JSR	(Jump to a subroutine)	   x
+JSR	(Jump to a subroutine)	   
 RTS	(Return from subroutine)
 
 BCC	(Branch if carry flag clear)

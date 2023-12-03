@@ -1,0 +1,5 @@
+LDA #$2
+LDX #$1
+STX $0
+ADC $0
+JMP $1
