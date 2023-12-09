@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 uint8_t mem[65536];
+uint8_t opcodes[65536];
 uint16_t pointer = 0xC000;
 
 
@@ -62,6 +63,15 @@ const uint8_t getInstruct(const char* str) {
     if (strcmp(str, "SBC_AX") == 0) return 0xFD;
     if (strcmp(str, "SBC_AY") == 0) return 0xF9;
 
+    if (strcmp(str, "CMP_I") == 0) return CMP_I;
+    if (strcmp(str, "CMP_A") == 0) return CMP_A;
+    if (strcmp(str, "CMP_AX") == 0) return CMP_AX;
+    if (strcmp(str, "CMP_AY") == 0) return CMP_AY;
+
+    if (strcmp(str, "BEQ_A") == 0) return BEQ;
+
+
+
     return 0;
 }
 
@@ -107,8 +117,8 @@ struct instruct parseLine(char *line) {
             // strcpy(current.instruction, instruction);
             // current.opcode = atoi(opcode);
             mem[pointer] = (uint8_t)getInstruct(instruction);
-            mem[pointer+1] = atoi(opcode);
-            pointer+=2;
+            opcodes[pointer] = atoi(opcode);
+            pointer++;
         }
     }
 }

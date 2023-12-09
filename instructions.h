@@ -58,5 +58,15 @@
 #define SBC_AX 0xFD
 #define SBC_AY 0xF9
 
+//compare
+#define CMP_I 0xC9
+#define CMP_A 0xD5
+#define CMP_AX 0xDD
+#define CMP_AY 0xD9
+
+
+//branch if flags
+#define BEQ 0xF0
+
 #endif
 

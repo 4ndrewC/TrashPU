@@ -2,4 +2,6 @@ LDA #$2
 LDX #$1
 STX $0
 ADC $0
-JMP $1
+CMP #$10
+BEQ $11
+JMP $3
