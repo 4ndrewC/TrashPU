@@ -1,7 +1,7 @@
-LDA #$2
+LDA #$90
 LDX #$1
 STX $0
-ADC $0
-CMP #$10
+SBC $0
+CMP #$9
 BEQ $11
 JMP $3

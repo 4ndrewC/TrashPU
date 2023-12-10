@@ -27,9 +27,18 @@ int main(){
     // fetch();
     // fetch();
     // fetch();
+    // fetch();
+    // fetch();
+    // fetch();
+    // fetch();
+    // fetch();
+    // fetch();
+    // fetch();
 
 
-    // printf("%d", PC);
+    
+
+    // printf("%d", mem[0x0000]);
 
     return 0;
 }

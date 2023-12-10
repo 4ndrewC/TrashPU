@@ -68,7 +68,13 @@ void setFlag(){
 
 void setArithFlags(byte op, byte ac, int res){
     I = Z = N = D = B = 0;
-    C = (res>0xFF)?1:0;
+    if(mem[PC]==SBC_A){
+        C = (res<0x00)?1:0;
+    }
+    else{
+        C = (res>0xFF)?1:0;
+    }
+    
     O = ((ac^op) & 0x80) && ((ac^res) & 0x80);
     N = (res & 0x80)?1:0;
     Z = (res==0)?1:0;
@@ -407,28 +413,28 @@ void execute(){;
         case SBC_I:
             printf("SBC_I\n");
             data = opcodes[PC%(maxRead)];
-            res = data - A - C;
+            res = A - data;
             setArithFlags(data, A, res);
             break;
         case SBC_A:
             printf("SBC_A\n");
             addr = opcodes[PC%(maxRead)]%maxWrite;
             data = mem[addr];
-            res = data - A - C;
+            res = A - data;
             setArithFlags(data, A, res);
             break;
         case SBC_AX:
             printf("SBC_AX\n");
             addr = (X+opcodes[PC%(maxRead)])%maxWrite;
             data = mem[addr];
-            res = data - A - C;
+            res = A - data;
             setArithFlags(data, A, res);
             break;
         case SBC_AY:
             printf("SBC_AY\n");
             addr = (Y+opcodes[PC%(maxWrite)])%maxWrite;
             data = mem[addr];
-            res = data - A - C;
+            res = A - data;
             setArithFlags(data, A, res);
             break;
         
@@ -481,7 +487,7 @@ void fetch(){
     // printf("current instruction: ");
     // printf("%d", mem[PC]);
     // printf("\n");
-    if(mem[PC]==ADC_A) printf("%d\n", A); 
+    if(mem[PC]==ADC_A || mem[PC]==SBC_A) printf("%d\n", A); 
     execute();
     
     PC++;
