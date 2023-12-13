@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-uint8_t mem[65536];
-uint8_t opcodes[65536];
-uint16_t pointer = 0xC000;
+uint16_t pointer;
+// uint8_t *mem;
+
 
 
 const uint8_t getInstruct(const char* str) {
@@ -80,7 +80,8 @@ struct instruct{
     int opcode;
 };
 
-struct instruct parseLine(char *line) {
+void parseLine(char *line, uint8_t *mem, uint8_t *opcodes) {
+    
     char instruction[100];
     char *token = strtok(line, " "); // assuming space separates "text" and "$43043,x"
     char opcode[100];   
@@ -124,8 +125,14 @@ struct instruct parseLine(char *line) {
 }
 
 
-int memoryInit() {
-    FILE *file = fopen("instructions.in", "r");
+int memoryInit(char *filename, uint8_t *vm, uint8_t *vmop) {
+    uint8_t *mem = vm;
+    uint8_t *opcodes = vmop;
+    pointer = 0xC000;
+    // mem = vm;
+    FILE *file = fopen(filename, "r");
+    // printf("Loading ");
+    printf("\n%s %s %s\n\n", "Loading", (char *)filename, "into mem");
     if (file == NULL) {
         perror("Error opening file");
         return 1;
@@ -138,7 +145,7 @@ int memoryInit() {
         if (line[length - 1] == '\n') {
             line[length - 1] = '\0';
         }
-        parseLine(line);
+        parseLine(line, mem, opcodes);
         // printf("%d", mem[0xC008]);
     }
 

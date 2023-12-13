@@ -1,0 +1,7 @@
+LDA #$1
+LDX #$1
+STX $0
+ADC $0
+CMP #$100
+BEQ $100
+JMP $3

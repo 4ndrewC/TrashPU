@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "cpu.c"
+#include "scheduler.c"
+// #include "memory.c"
 
 int main(){
-    memoryInit();
+    // memoryInit("instr2.in");
     CPUInit();
-
-    while(PC<=0xFFFE){
-        fetch();
-        // printf("%d\n", A);
-    }
+    schedulerRun();
+    
+    // while(PC<=0xFFFE){
+    //     fetch();
+    //     // printf("%d\n", A);
+    // }
 
     // mem[0xC000] = 0xA9;
     // mem[0xC001] = 1;

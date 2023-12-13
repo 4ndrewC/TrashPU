@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include "instructions.h"
 #include "flags.h"
-#include "memory.c"
 
 //mem[0] stores current rom pointer, mem[1] stores current ram pointer
 
@@ -11,13 +10,16 @@ typedef uint16_t word;
 typedef uint8_t byte;
 
 word PC;
-word A, SP, P, X, Y;
+word A, SP, X, Y;
 
 //status flags
 byte flag;
 byte C, Z, N, I, D, B, O;
 word maxWrite = 0xC000;
 int maxRead = 0xFFFF+1;
+
+byte *mem;
+byte *opcodes;
 
 
 void CPUInit(){
@@ -487,9 +489,9 @@ void fetch(){
     // printf("current instruction: ");
     // printf("%d", mem[PC]);
     // printf("\n");
-    if(mem[PC]==ADC_A || mem[PC]==SBC_A) printf("%d\n", A); 
-    execute();
     
+    execute();
+    if(mem[PC]==ADC_A || mem[PC]==SBC_A) printf("%s %d\n", "Accumulator Value:", A); 
     PC++;
     
 }

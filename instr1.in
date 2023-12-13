@@ -2,6 +2,6 @@ LDA #$90
 LDX #$1
 STX $0
 SBC $0
-CMP #$9
-BEQ $11
+CMP #$10
+BEQ $100
 JMP $3
