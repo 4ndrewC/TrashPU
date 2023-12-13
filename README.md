@@ -8,4 +8,5 @@ This cpu can only do the most basic calculations, such as looping (infinitely), 
 
 Architecture specifics are in cpuarch.txt
 
-Round robin scheduling: no clock implemented, burst time for each process is one fetch cycle
+Round robin scheduling (multi-tasking): no clock implemented, burst time for each process is one fetch cycle
+- instr1-3.in are input instructions
