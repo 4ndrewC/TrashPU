@@ -18,9 +18,11 @@ byte C, Z, N, I, D, B, O;
 word maxWrite = 0xC000;
 int maxRead = 0xFFFF+1;
 
-byte *mem;
-byte *opcodes;
+byte mem[67000];
+byte opcodes[67000];
 
+int taskmap[1000];
+int task;
 
 void CPUInit(){
     PC = 0xC000;
@@ -378,6 +380,7 @@ void execute(){;
             addr = opcodes[PC]%(0x3FFF+1) + 0xC000;
             PC = addr;
             PC--;
+            printf("%s\n", "jumped here");
             break;
         
         //arithmetic
@@ -483,16 +486,20 @@ void execute(){;
 
 void fetch(){
 
-    // printf("PC fetch addr: ");
-    // printf("%d", PC); 
+    printf("PC fetch addr: ");
+    printf("%d", PC); 
+    printf("\n");
+    printf("current instruction: ");
+    printf("%d\n", mem[PC]);
     // printf("\n");
-    // printf("current instruction: ");
-    // printf("%d", mem[PC]);
-    // printf("\n");
-    
+    // printf("%s\n", "executing");
     execute();
+    // printf("%s\n", "execute finished");
+    // printf("%s %d\n", "Current pointer location", mem[PC]);
+    // if(mem[PC]==JMP) printf("%s\n", "jumped");
     if(mem[PC]==ADC_A || mem[PC]==SBC_A) printf("%s %d\n", "Accumulator Value:", A); 
     PC++;
+    taskmap[task]++;
     
 }
 
