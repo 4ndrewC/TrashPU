@@ -70,8 +70,6 @@ const uint8_t getInstruct(const char* str) {
 
     if (strcmp(str, "BEQ_A") == 0) return BEQ;
 
-
-
     return 0;
 }
 
