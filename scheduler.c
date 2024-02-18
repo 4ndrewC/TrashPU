@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "memory.c"
-#include "cpu.c"
+#include "mmu.c"
 
 int burst;
 byte vm1[65536];
@@ -11,56 +11,10 @@ byte op2[65536];
 byte vm3[65536];
 byte op3[65536];
 
-struct state{
-    int PID;
-    byte *vm;
-    byte *opcodes;
-    word PC;
-    word A, SP, X, Y;
-    byte C, Z, N, I, D, B, O;
-};
 
-void saveState(struct state *cur){
-    cur -> vm = mem;
-    cur -> opcodes = opcodes;
-    cur -> PC = PC;
-    cur -> A = A;
-    cur -> X = X;
-    cur -> Y = Y;
-    cur -> SP = SP;
-
-    //save flags
-    cur -> C = C;
-    cur -> Z = Z;
-    cur -> N = N;
-    cur -> I = I;
-    cur -> D = D;
-    cur -> B = B;
-    cur -> O = O;
-}
-
-void loadState(struct state *next){
-    mem = next->vm;
-    opcodes = next->opcodes;
-    PC = next->PC;
-    A = next->A;
-    X = next->X;
-    Y = next->Y;
-    SP = next->SP;
-
-    //load flags
-    C = next -> C;;
-    Z = next -> Z;;
-    N = next -> N;;
-    I = next -> I;;
-    D = next -> D;;
-    B = next -> B;;
-    O = next -> O;;
-    
-}
 
 struct Node{
-    struct state* cur;
+    int cur;
     struct Node* next;
 };
 
@@ -77,7 +31,7 @@ void startQueue(struct Queue *queue){
 };
 
 
-void push(struct Queue *queue, struct state* cur){
+void push(struct Queue *queue, int cur){
     // printf("%d\n", cur->PID);
     struct Node* node = (struct Node*)malloc(sizeof(struct Node));
 
@@ -94,12 +48,12 @@ void push(struct Queue *queue, struct state* cur){
     }
 }
 
-struct state* pop(struct Queue *queue){
+int pop(struct Queue *queue){
     if(queue->front==NULL){
-        return NULL;
+        return -1;
     }
 
-    struct state* cur = queue->front->cur;
+    int cur = queue->front->cur;
     struct Node* temp = queue->front;
     
     queue->front = queue->front->next;
@@ -119,110 +73,186 @@ void printQueue(struct Queue *queue){
     }
     struct Node* node = queue->front;
     while(node!=NULL){
-        printf("%d -> ", node->cur->PID);
+        printf("%d -> ", node->cur);
         node = node->next;
     }
     printf("NULL\n");
 }
 
-
-
-void schedulerRun(){
-    // printf("%s\n", "Loading instruction set 1");
-    
-    struct state p1;
-    struct state p2;
-    struct state p3;
-    p2.PID = 2;
-    p1.PID = 1;
-    p3.PID = 3;
-    memoryInit("instr1.in", vm1, op1);
-    // printf("%s\n", "Loading instruction set 2");
-    memoryInit("instr2.in", vm2, op2);
-    memoryInit("instr3.in", vm3, op3);
-
-    printf("Mem and opcodes initialized\n");
-
-    mem = vm1;
-    opcodes = op1;
-    saveState(&p1);
-
-    mem = vm2;
-    opcodes = op2;
-    saveState(&p2);
-
-    mem = vm3;
-    opcodes = op3;
-    saveState(&p3);
-
-    
-
-    printf("States initialized\n");
-
-    struct Queue q;
-    startQueue(&q);
-    push(&q, &p1);
-    push(&q, &p2);
-    push(&q, &p3);
-
-    printQueue(&q);
-
-    printf("Queue initialized\n");
-
-    struct state test;
-
-    // test = *pop(&q);
-    // printQueue(&q);
-    // printf("%d\n", test.PID);
-    // printQueue(&q);
-    // push(&q, &p1);
-    // printQueue(&q);
-    // test = *pop(&q);
-    // printQueue(&q);
-    // printf("%d\n", test.PID);
-    // push(&q, &p2);
-    // printQueue(&q);
-    // test = *pop(&q);
-    // printQueue(&q);
-    // printf("%d\n", test.PID);
-    // printf("%d\n", p1.vm[0xC003]);
-    // printf("%d\n", p2.vm[0xC003]);
-    // printf("%d\n", vm1[0xC000]);
-    // printf("%d\n", op1[0xC000]);
-    // printf("%d\n", op2[0xC000]);
-    
-    for(int i = 0; 1; i++){
-        
-        // printf("Before\n");
-        // printQueue(&q);
-
-        struct state *cur = pop(&q);
-        
-        // printf("%s %d\n", "Popped PID:", cur->PID);
-        // printf("%s %d\n", "cur.A content", cur->A);
-        // printQueue(&q);
-        
-        loadState(cur);
-        fetch();
-        
-        saveState(cur);
-        // printf("%s %d\n", "Popped PID:", cur->PID);
-        // printf("%s %d\n", "cur.A content", cur->A);
-        if(PC>=0xFFFE) {
-            free(cur);
-            if(q.front==NULL){
-                break;
-            }
-            continue;
-        }
-
-        push(&q, cur);
-        // printf("After\n");
-        // printQueue(&q);
-        
-        free(cur);
-
+void test(){
+    for(int i = 1; i<=3; i++){
+        printf("%d", disk[0xC000*i]);
     }
-    
 }
 
+void cpoint(){
+    printf("%s", "Got here\n");
+}
+
+void cpointspec(char *str){
+    printf("%s\n", str);
+}
+
+void showdisk(int location){
+    printf("%s %d\n", "Virtual Mem:", disk[location]);
+    printf("%s %d\n", "Virtual Mem Opcode:", diskop[location]);
+}
+
+void diskstatus(){
+    for(int i = 0; i<10000000; i++){
+        if(disk[i]!=0){
+            printf("%d%s %d\n", i, ":", disk[i]);
+        }
+    }
+}
+
+void taskstatus(){
+    for(int i = 0; i<10; i++){
+        if(taskmap[i]!=0){
+            printf("%s %d\n", "task:", taskmap[i]);
+        }
+    }
+}
+
+void memstatus(){
+    for(int i = 0; i<67000; i++){
+        if(mem[i]!=0){
+            printf("%s %d%s %d\n", "Memory Location:", i, ":", mem[i]);
+        }
+    }
+}
+
+void showmem(int location){
+    printf("%s %d\n", "Mem:", mem[location]);
+    printf("%s %d\n", "Mem Opcode:", opcodes[location]);
+}
+
+void showtask(){
+    printf("%s %d\n", "Current task:", task);
+}
+
+void split(){
+    printf("%s\n", "--------------------------");
+}
+
+void fill(int t, byte *tempmem, byte *tempop){
+    for(int k = 0; k<MEMSIZE; k++){
+        // cpoint();
+        disk[t*MEMSIZE+k] = tempmem[k];
+        diskop[t*MEMSIZE+k] = tempop[k];
+    }
+}
+
+void fillspace(){
+    for(int i = 0; i<MEMSIZE; i++){
+        space[i] = 2;
+    }
+}
+
+void cycle(){
+
+}
+
+void schedulerRun(){
+    
+    struct Queue q;
+    startQueue(&q);
+    printf("%s", "Queue Initialized\n");
+    int totaltasks = 3;
+    //fill disk/virtual mem
+    for(int t = 0; t<totaltasks; t++){
+        byte tempmem[MEMSIZE];
+        byte tempop[MEMSIZE];
+        char *instr = "instr";
+        char taskstr[8];
+        char *filename = (char *)malloc(strlen(instr) + strlen(".in") + 1);;
+        // cpoint();
+        snprintf(taskstr, 8, "%d", t+1);
+
+        // cpointspec(taskstr);
+
+        strcpy(filename, instr);
+        strcat(filename, taskstr);
+        // cpoint();
+        strcat(filename, ".in");
+        // cpoint();
+        memoryInit(filename, tempmem, tempop);
+        // cpoint();
+        fill(t, tempmem, tempop);
+        // showdisk(0xC004);
+        // printf("%d\n", diskop[0xC004]);
+
+        taskmap[t+1] = 0xC000+(t*MEMSIZE);
+    }
+    printf("%s\n", "Virtual Memory Initialized");   
+    fillspace();
+
+    diskstatus();
+    taskstatus();
+
+    word scantest = scan(1); 
+    printf("%d\n", scantest);
+
+    swapin(scantest*8, 1, 1);
+    memstatus();
+    
+    split();
+
+    showtask();
+    showdisk(PC);
+    showmem(PC);
+    fetch();
+
+    scantest = scan(1); 
+    swapout(scantest*8, 1);
+    swapin(scantest*8, 2, 1);
+    memstatus();
+
+    split();
+
+    showtask();
+    showdisk(PC);
+    showmem(PC);
+    fetch();
+
+    scantest = scan(1); 
+    swapout(scantest*8, 1);
+    swapin(scantest*8, 3, 1);
+
+    split();
+
+    showtask();
+    showdisk(PC);
+    showmem(PC);
+    fetch();
+
+    scantest = scan(1); 
+    swapout(scantest*8, 1);
+    swapin(scantest*8, 1, 1);
+
+    split();
+
+    showtask();
+    showdisk(PC);
+    showmem(PC);
+    fetch();
+
+    // scantest = scan(1); 
+    // swapout(PC, 1);
+    // swapin(scantest*8, 1, 1);
+
+    // split();
+
+    // showtask();
+    // showdisk(0xC004);
+    // showmem(PC);
+    // fetch();
+    // showdisk(PC);
+    // showmem(PC);
+    // fetch();
+    // showdisk(PC);
+    // showmem(PC);
+    
+    
+    
+}
