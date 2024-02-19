@@ -10,5 +10,5 @@ Architecture specifics are in cpuarch.txt (not accurate lol)
 
 Round robin scheduling (multi-tasking): no clock implemented, burst time for each process is one fetch cycle
 - instr1-3.in are input instructions
-- paged + virtual memory for multi-tasking
+- paged + virtual memory for multi-tasking (50% of it is implemented wrong)
 - doesn't fully work
